@@ -1,0 +1,28 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Showroom-BPR/Backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Showroom-BPR/Backend/issues"
+  },
+  "homepage": "https://github.com/Showroom-BPR/Backend#readme",
+  "dependencies": {
+    "@gltf-transform/core": "^3.1.1",
+    "@gltf-transform/extensions": "^3.1.1",
+    "@gltf-transform/functions": "^3.1.1",
+    "express": "^4.18.2"
+    },
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  }
+}
