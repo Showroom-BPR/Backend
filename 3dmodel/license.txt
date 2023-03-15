@@ -1,0 +1,11 @@
+Model Information:
+* title:	Mario Lego
+* source:	https://sketchfab.com/3d-models/mario-lego-d22ca8f9f1aa4bd9a3a21b9feae14c54
+* author:	wallmasterr (https://sketchfab.com/wallmasterr)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Mario Lego" (https://sketchfab.com/3d-models/mario-lego-d22ca8f9f1aa4bd9a3a21b9feae14c54) by wallmasterr (https://sketchfab.com/wallmasterr) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
