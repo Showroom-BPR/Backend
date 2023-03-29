@@ -7,8 +7,7 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/index.js",
-    "buildAndStart": "npm run build && npm run start",
-    "ebDeploy": "npm install && npm run buildAndStart"
+    "buildAndStart": "npm run build && npm run start"
   },
   "repository": {
     "type": "git",
