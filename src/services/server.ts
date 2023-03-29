@@ -3,9 +3,11 @@ import multer from "multer";
 import dotnev from "dotenv";
 import crypto from "crypto";
 import sharp from "sharp";
+import { MulterRequest } from "multer";
 
 //using prisma to interact with the databasae.
-import { PrismaClient } from "@prisma/client";
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
 import {
   S3Client,
@@ -14,6 +16,7 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import AWS from "aws-sdk";
 
 dotnev.config();
 
@@ -30,13 +33,12 @@ const aws_database_url = process.env.AWS_DATABASE_URL;
 const s3 = new S3Client({
   credentials: {
     accessKeyId: aws_access_key,
-    secretAccess: aws_secret_access_key,
+    secretAccessKey: aws_secret_access_key,
   },
   region: aws_bucket_region,
 });
 
 const app = express();
-const prisma = new PrismaClient();
 
 //create a memoryStorage obj and upload function with multer
 //that is going to make sure it always stores the image in memory.
@@ -51,8 +53,8 @@ app.get("/api/posts", async (req, res) => {
       Bucket: aws_bucket_name,
       Key: post.imageName,
     };
-    const command = new GetObjectCommand(GetObjectParams);
-    const url = await getSignedUrl(client, command, { expiresIn: 3600 });
+    const command = new GetObjectCommand(getObjectParamas);
+    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
     post.imageUrl = url;
   }
 
@@ -63,9 +65,9 @@ app.get("/api/posts", async (req, res) => {
 //upload.single('image')
 app.post("api/posts", upload.single("image"), async (req, res) => {
   console.log("req.body", req.body); //see what kind of info we get from this post req.
-  console.log("req.file", req.file);
+  console.log("req.file", (req as MulterRequest).file);
 
-  const buffer = await sharp(req.file.buffer)
+  const buffer = await sharp((req as MulterRequest).file.buffer)
     .resize({ height: 1920, width: 1080, fit: "contain" })
     .toBuffer();
 
@@ -74,7 +76,7 @@ app.post("api/posts", upload.single("image"), async (req, res) => {
     Bucket: aws_bucket_name,
     Key: imageName,
     Body: buffer,
-    ContentType: req.file.mimetype,
+    ContentType: (req as MulterRequest).file.mimetype,
   };
   const command = new PutObjectCommand(params);
 
