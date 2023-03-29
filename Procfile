@@ -1,1 +1,1 @@
-web: npm run buildAndStart
+web: npm run ebDeploy
