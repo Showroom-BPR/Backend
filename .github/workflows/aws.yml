@@ -32,7 +32,7 @@ on:
 
 env:
   AWS_REGION: eu-north-1                   # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: bpr-ecr-repo           # set this to your Amazon ECR repository name
+  ECR_REPOSITORY: bpr-backend           # set this to your Amazon ECR repository name
   ECS_SERVICE: BackendDevService                 # set this to your Amazon ECS service name
   ECS_CLUSTER: DevCluster                 # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION: .aws/task-definition.json # set this to the path to your Amazon ECS task definition
