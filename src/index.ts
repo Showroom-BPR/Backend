@@ -1,40 +1,28 @@
-import { NodeIO, Document } from '@gltf-transform/core';
-import * as fs from "fs/promises";
 import express from "express";
-
 import dotenv from 'dotenv'
+import { get3DAsset } from "./services/3dAssetsService.js";
 
 dotenv.config();
 
-import { getBucketList, getObjectLsit } from "./services/aws.js"
-
 const app = express()
 const port = process.env.PORT || 80
-
-getBucketList();
-
-getObjectLsit();
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-app.get('/3dmodel', async (req, res) => {
-    const io = new NodeIO();
+app.get('/3DAsset', async (req, res) => {
 
-    var gltfmodel = new Document();
+  let username = req.query.username;
+  let productId = req.query.productId;
+
+  let asset3D = await get3DAsset(username, productId);
+
+  res.send(Buffer.from(asset3D))
+
+  // var jsonModel = await replaceTexture();
     
-    gltfmodel = await io.read("./3dmodel/mario.gltf");
-    
-    gltfmodel.getRoot().listTextures()[0].setImage(await fs.readFile('./greenTexture.png'));
-    gltfmodel.getRoot().listTextures()[0].setURI("greenTexture.png");
-    
-    var jsonModel = await io.writeBinary(gltfmodel).then((json)=> {
-        console.log(json)
-        return json;
-    });
-    
-    res.send(Buffer.from(jsonModel));
+  // res.send(Buffer.from(jsonModel));
 })
 
 app.listen(port, () => {
