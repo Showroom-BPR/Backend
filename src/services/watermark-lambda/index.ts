@@ -139,10 +139,7 @@ const watermarkImage = async (imageInfo: ImageInfo) => {
 
   putS3Object(imageInfo.imageBucket, resultImageName, readableStream);
 
-  return {
-    watermarkedPath: tempWatermarkedImagePath,
-    imagePath: tempImgPath,
-  };
+  return readableStream
 };
 
 module.exports.watermark = async (event: any, context: any) => {
@@ -152,5 +149,5 @@ module.exports.watermark = async (event: any, context: any) => {
   //needed to clear permissions for the zip file
   exec('chmod -R o+rX .');
 
-  await watermarkImage(JSON.parse(event.body));
+  return await watermarkImage(JSON.parse(event.body));
 }
