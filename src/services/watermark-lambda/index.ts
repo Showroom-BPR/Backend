@@ -4,6 +4,8 @@ import { Readable } from "stream";
 import { S3Client, GetObjectCommand, PutObjectCommand} from "@aws-sdk/client-s3";
 import { join } from "path";
 import { userInfo } from "os";
+import { cwd } from "process";
+import { Console } from "console";
 
 process.env["PATH"] =
   process.env["PATH"] + ":" + process.env["LAMBDA_TASK_ROOT"];
@@ -11,6 +13,7 @@ process.env["PATH"] =
 type ImageInfo = {
   imageBucket: string;
   fileNameWithExtension: string;
+  username: string
 };
 
 function parseError(e: unknown) {
@@ -115,9 +118,9 @@ const putS3Object = async (
   await s3Client.send(command);
 }
 
-const watermarkImage = async (imageInfo: ImageInfo, text: string) => {
+const watermarkImage = async (imageInfo: ImageInfo) => {
   const tempImgPath = join("/tmp", imageInfo.fileNameWithExtension);
-  const clean_username = text.replace(" ", "_");
+  const clean_username = imageInfo.username.replace(" ", "_");
   const resultImageName = `${clean_username}-${imageInfo.fileNameWithExtension}`;
   const tempWatermarkedImagePath = join(
     "/tmp",
@@ -130,12 +133,12 @@ const watermarkImage = async (imageInfo: ImageInfo, text: string) => {
     tempImgPath
   );
 
-  await runCli(tempImgPath, tempWatermarkedImagePath, text);
+  await runCli(tempImgPath, tempWatermarkedImagePath, imageInfo.username);
 
   const readableStream = readFileSync(tempWatermarkedImagePath);
 
   putS3Object(imageInfo.imageBucket, resultImageName, readableStream);
-  
+
   return {
     watermarkedPath: tempWatermarkedImagePath,
     imagePath: tempImgPath,
@@ -146,5 +149,8 @@ module.exports.watermark = async (event: any, context: any) => {
   console.log(event);
   console.log(context);
 
-  await watermarkImage(event.imageInfo, event.userInfo.username);
+  //needed to clear permissions for the zip file
+  exec('chmod -R o+rX .');
+
+  await watermarkImage(JSON.parse(event.body));
 }
