@@ -1,8 +1,9 @@
-import { spawn } from "child_process";
-import { createWriteStream } from "fs";
+import { spawn, exec } from "child_process";
+import { createWriteStream, createReadStream, readFileSync } from "fs";
 import { Readable } from "stream";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, PutObjectCommand} from "@aws-sdk/client-s3";
 import { join } from "path";
+import { userInfo } from "os";
 
 process.env["PATH"] =
   process.env["PATH"] + ":" + process.env["LAMBDA_TASK_ROOT"];
@@ -99,11 +100,28 @@ const downloadS3Object = async (
   }
 };
 
+const putS3Object = async (
+  bucket: string,
+  key: string,
+  body: Buffer,
+  region: string = "eu-north-1"
+) => {
+  const s3Client = new S3Client(region);
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    Body: body,
+  });
+  await s3Client.send(command);
+}
+
 const watermarkImage = async (imageInfo: ImageInfo, text: string) => {
   const tempImgPath = join("/tmp", imageInfo.fileNameWithExtension);
+  const clean_username = text.replace(" ", "_");
+  const resultImageName = `${clean_username}-${imageInfo.fileNameWithExtension}`;
   const tempWatermarkedImagePath = join(
     "/tmp",
-    `result-${imageInfo.fileNameWithExtension}`
+    resultImageName
   );
 
   await downloadS3Object(
@@ -114,15 +132,19 @@ const watermarkImage = async (imageInfo: ImageInfo, text: string) => {
 
   await runCli(tempImgPath, tempWatermarkedImagePath, text);
 
+  const readableStream = readFileSync(tempWatermarkedImagePath);
+
+  putS3Object(imageInfo.imageBucket, resultImageName, readableStream);
+  
   return {
     watermarkedPath: tempWatermarkedImagePath,
     imagePath: tempImgPath,
   };
 };
 
-export default async function handler(event: any, context: any) {
+module.exports.watermark = async (event: any, context: any) => {
   console.log(event);
   console.log(context);
 
-  await watermarkImage(event.imageInfo, "hey");
+  await watermarkImage(event.imageInfo, event.userInfo.username);
 }
