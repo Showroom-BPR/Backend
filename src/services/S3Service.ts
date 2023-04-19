@@ -4,6 +4,7 @@ import {
   HeadObjectCommand,
   HeadObjectCommandInput,
   HeadObjectCommandOutput,
+  GetObjectCommandOutput,
 } from "@aws-sdk/client-s3";
 import { createWriteStream } from "fs";
 import { Readable } from "stream";
@@ -22,30 +23,19 @@ export async function existsInS3(
     };
     const cmd = new HeadObjectCommand(bucketParams);
     const data: HeadObjectCommandOutput = await client.send(cmd);
-    console.log("data", data);
 
-    // I always get 200 for my testing if the object exists
-    const exists = data.$metadata.httpStatusCode === 200;
-    return exists;
+    return data.$metadata.httpStatusCode === 200;
   } catch (error) {
-    if (error.$metadata?.httpStatusCode === 404) {
-      // doesn't exist and permission policy includes s3:ListBucket
-      return false;
-    } else if (error.$metadata?.httpStatusCode === 403) {
-      // doesn't exist, permission policy WITHOUT s3:ListBucket
-      return false;
-    } else {
-      // some other error
-      return false;
-    }
+    console.error(error);
+    return false;
   }
 }
 
 const getS3Object = async (
   bucket: string,
   key: string,
-  region = "eu-north-1"
-) => {
+  region: string = "eu-north-1"
+): Promise<GetObjectCommandOutput> => {
   const s3Client = new S3Client({ region });
   const command = new GetObjectCommand({
     Bucket: bucket,
@@ -70,7 +60,7 @@ export const downloadS3Object = async (
   key: string,
   outputPath: string,
   region: string = "eu-north-1"
-) => {
+): Promise<void> => {
   const object = await getS3Object(bucket, key, region);
   if (object.Body instanceof Readable) {
     await writeStreamToFile(object.Body, outputPath);

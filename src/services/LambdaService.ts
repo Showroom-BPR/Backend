@@ -1,11 +1,15 @@
 import axios from "axios";
 const LAMBDA_FUNC_URL =
   "https://pfe6dxe7ee77bzc6jktkbe5yje0rkmxb.lambda-url.eu-north-1.on.aws/";
+const textures_bucket = "virtual-showroom-textures";
 
-export function createWatermarkedTexture(username, productId) {
+export async function createWatermarkedTexture(
+  username: string,
+  productId: string
+): Promise<any> {
   let data = JSON.stringify({
     fileNameWithExtension: `${productId}.png`,
-    imageBucket: "virtual-showroom-textures",
+    imageBucket: textures_bucket,
     username: username,
   });
 

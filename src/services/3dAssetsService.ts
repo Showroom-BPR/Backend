@@ -3,13 +3,17 @@ import { createWatermarkedTexture } from "./LambdaService.js";
 import { replaceTexture } from "./gltfService.js";
 import { SaveBufferToFile } from "../fsUtils.js";
 
-export async function get3DAsset(username, productId) {
+const textures_bucket = "virtual-showroom-textures";
+const models_bucket = "virtual-showroom-3dmodels";
+
+export async function get3DAsset(
+  username: string,
+  productId: string
+): Promise<Uint8Array> {
   const result_texture_name = `${username}-${productId}.png`;
   const asset3dName = `${productId}.glb`;
 
-  const textures_bucket = "virtual-showroom-textures";
-
-  await downloadS3Object("virtual-showroom-3dmodels", asset3dName, asset3dName);
+  await downloadS3Object(models_bucket, asset3dName, asset3dName);
 
   if (await existsInS3(textures_bucket, result_texture_name)) {
     console.log("Watermarked texture exists.");
@@ -23,7 +27,7 @@ export async function get3DAsset(username, productId) {
     console.log("Watermarked texture does not exist. Will be created now");
 
     const result = await createWatermarkedTexture(username, productId);
-    const buffer = new Buffer(result, "binary");
+    const buffer = Buffer.from(result, "binary");
     await SaveBufferToFile(buffer, result_texture_name);
   }
 
