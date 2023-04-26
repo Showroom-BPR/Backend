@@ -15,7 +15,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v3
       - name: Generate deployment package
-        run: zip -r deploy.zip . -x '**.git**'
+        run: zip -r deploy-new.zip . -x '**.git**'
       - name: Get current timestamp
         uses: gerred/actions/current-time@master
         id: current-time
