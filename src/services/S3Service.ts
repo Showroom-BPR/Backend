@@ -8,6 +8,9 @@ import {
 } from "@aws-sdk/client-s3";
 import { createWriteStream } from "fs";
 import { Readable } from "stream";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export async function existsInS3(
   bucket: string,
@@ -15,7 +18,13 @@ export async function existsInS3(
   region: string = "eu-north-1"
 ): Promise<boolean> {
   try {
-    const client = new S3Client({ region });
+    const client = new S3Client({
+      region: region,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
+    });
 
     const bucketParams: HeadObjectCommandInput = {
       Bucket: bucket,
@@ -36,12 +45,18 @@ const getS3Object = async (
   key: string,
   region: string = "eu-north-1"
 ): Promise<GetObjectCommandOutput> => {
-  const s3Client = new S3Client({ region });
+  const client = new S3Client({
+    region: region,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+  });
   const command = new GetObjectCommand({
     Bucket: bucket,
     Key: key,
   });
-  const object = await s3Client.send(command);
+  const object = await client.send(command);
   return object;
 };
 

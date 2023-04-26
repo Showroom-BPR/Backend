@@ -8,7 +8,7 @@ import * as os from "os";
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 82;
+const port = process.env.PORT || 80;
 
 app.get("/", (_, res) => {
   res.send("Hello World!");
@@ -24,7 +24,7 @@ app.get("/3DAsset", async (req, res) => {
   const processTempFolderName: string = `${os.tmpdir()}/LEGO_SHOWROOM/${processId}`;
 
   try {
-    fs.mkdirSync(processTempFolderName, {});
+    fs.mkdirSync(processTempFolderName, { recursive: true });
     const asset3D = await get3DAsset(
       username,
       productId,

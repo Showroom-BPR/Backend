@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  backend:
+    image: showroom-backend:latest
+    ports:
+      - "8080:80"
+    environment:
+      AWS_ACCESS_KEY: AKIAZSLNOGNLX2PHMPWS
+      AWS_BUCKET_REGION: eu-north-1
+      AWS_SECRET_ACCESS_KEY: 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
