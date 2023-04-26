@@ -11,6 +11,15 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 80;
 
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: ["GET", "POST"],
+  })
+);
+
 app.get("/", (_, res) => {
   res.send("Hello World!");
 });
@@ -51,11 +60,3 @@ app.get("/3DAsset", async (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
-
-app.use((req, res) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-}, cors());
