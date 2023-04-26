@@ -3,27 +3,40 @@ name: Deploy master
 on:
   push:
     branches:
-    - main
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [17.x]
     steps:
-
-    - name: Checkout source code
-      uses: actions/checkout@v2
-
-    - name: Generate deployment package
-      run: zip -r deploy.zip . -x '*.git*'
-
-    - name: Deploy to EB
-      uses: einaregilsson/beanstalk-deploy@v21
-      with:
-        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        application_name: BPR_Docker_Backend
-        environment_name: Bprdockerbackend-env
-        version_label: ${{github.run_number}}
-        region: eu-north-1
-        deployment_package: deploy.zip
-        wait_for_deployment: false
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '**.git**'
+      - name: Get current timestamp
+        uses: gerred/actions/current-time@master
+        id: current-time
+      - name: Replace string
+        uses: frabert/replace-string-action@master
+        id: format-time
+        with:
+          pattern: '[:\.]+'
+          string: "${{ steps.current-time.outputs.time }}"
+          replace-with: "-"
+          flags: "g"
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: BPR_Docker_Backend
+          environment_name: Bprdockerbackend-env
+          version_label: "BPR_Docker_Backend-${{ steps.format-time.outputs.replaced }}"
+          region: eu-north-1
+          deployment_package: deploy.zip
+          wait_for_deployment: false
+      - name: Deployed successfully
+        run: echo Backend successfully deployed to Elastic Beanstalk
