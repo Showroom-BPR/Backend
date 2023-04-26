@@ -1,20 +1,26 @@
-import { NodeIO, Document } from '@gltf-transform/core';
+import { NodeIO, Document } from "@gltf-transform/core";
 import * as fs from "fs/promises";
 
-export async function replaceTexture(texture) {
-    const io = new NodeIO();
+export async function replaceTexture(
+  textureFilePath: string,
+  asset3dFilePath: string
+): Promise<Uint8Array> {
+  const io = new NodeIO();
 
-    var gltfmodel = new Document();
-    
-    gltfmodel = await io.read("./3dmodel/mario.gltf");
+  let gltfmodel = new Document();
 
-    gltfmodel.getRoot().listTextures()[0].setImage(await fs.readFile('./greenTexture.png'));
-    gltfmodel.getRoot().listTextures()[0].setURI("greenTexture.png");
+  gltfmodel = await io.read(asset3dFilePath);
 
-    var jsonModel = await io.writeBinary(gltfmodel).then((json)=> {
-        console.log(json)
-        return json;
-    });
+  gltfmodel
+    .getRoot()
+    .listTextures()[0]
+    .setImage(await fs.readFile(textureFilePath));
 
-    return jsonModel;
+  gltfmodel.getRoot().listTextures()[0].setURI(textureFilePath);
+
+  const jsonModel = await io.writeBinary(gltfmodel).then((json) => {
+    return json;
+  });
+
+  return jsonModel;
 }
