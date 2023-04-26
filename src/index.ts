@@ -4,6 +4,7 @@ import { get3DAsset } from "./services/3dAssetsService.js";
 import { v4 as uuidv4 } from "uuid";
 import * as fs from "fs";
 import * as os from "os";
+import cors from "cors";
 
 dotenv.config();
 
@@ -50,3 +51,5 @@ app.get("/3DAsset", async (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
+
+app.use(cors());
