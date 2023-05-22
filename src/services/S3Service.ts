@@ -5,10 +5,15 @@ import {
   HeadObjectCommandInput,
   HeadObjectCommandOutput,
   GetObjectCommandOutput,
+  InventoryS3BucketDestinationFilterSensitiveLog,
+  S3,
 } from "@aws-sdk/client-s3";
 import { createWriteStream } from "fs";
 import { Readable } from "stream";
 import dotenv from "dotenv";
+import { Prefix } from "aws-sdk/clients/firehose.js";
+import AWS, { S3Control } from "aws-sdk";
+import { stringify } from "querystring";
 
 dotenv.config();
 
@@ -40,7 +45,7 @@ export async function existsInS3(
   }
 }
 
-const getS3Object = async (
+export const getS3Object = async (
   bucket: string,
   key: string,
   region: string = "eu-north-1"
@@ -81,3 +86,50 @@ export const downloadS3Object = async (
     await writeStreamToFile(object.Body, outputPath);
   }
 };
+
+export async function existsPrefixInS3(prefix) {
+  return new Promise((resolve, reject) => {
+    const s3 = new AWS.S3();
+    try {
+      let params = {
+        Bucket: "virtual-showroom-animations",
+        prefix: prefix,
+        delimiter: prefix,
+      };
+
+      const allKeys = [];
+
+      listAllKeys();
+      function listAllKeys() {
+        s3.listObjects(params, function (err, data) {
+          if (err) {
+            reject(err);
+          } else {
+            var contents = data.Contents;
+            contents.forEach(function (content) {
+              allKeys.push(content.Key);
+            });
+          }
+        });
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
+export async function getS3ObjectAnimation(
+  bucket: string,
+  key: string,
+  region: string
+): Promise<any> {
+  const AWS = require("aws-sdk");
+  const s3 = new AWS.S3({ region });
+
+  const params = {
+    Bucket: bucket,
+    Key: key,
+  };
+
+  return s3.getObject(params).promise();
+}

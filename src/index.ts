@@ -1,10 +1,12 @@
 import express from "express";
+import { getS3Object } from "./services/S3Service.js";
 import dotenv from "dotenv";
 import { get3DAsset } from "./services/3dAssetsService.js";
 import { v4 as uuidv4 } from "uuid";
 import * as fs from "fs";
 import * as os from "os";
 import cors from "cors";
+import { getAnimation } from "./services/AnimationService.js";
 
 dotenv.config();
 
@@ -59,4 +61,29 @@ app.get("/3DAsset", async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
+});
+
+//1st see which animations exist on s3 with the certain id.
+//for each id download from s3 with getS3Object, then put
+//it into an object array. Then return the list.
+app.get("/Animation", async (req, res) => {
+  const processId: string = uuidv4();
+  console.log(processId);
+
+  const prefix = req.query.Prefix?.toString();
+  const delimiter = req.query.Delimiter?.toString();
+  const productId = req.query.productId?.toString();
+
+  if (!prefix || !delimiter || !productId) {
+    res.sendStatus(400);
+    return;
+  }
+
+  try {
+    const animation = await getAnimation(productId, prefix, delimiter);
+    res.send(animation);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
 });

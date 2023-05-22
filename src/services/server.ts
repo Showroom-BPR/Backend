@@ -16,7 +16,8 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import AWS from "aws-sdk";
+import AWS, { S3 } from "aws-sdk";
+import { downloadS3Object } from "./S3Service.js";
 
 dotnev.config();
 
@@ -118,3 +119,6 @@ app.delete("api/posts/:id", async (req, res) => {
 });
 
 app.listen(8080, () => console.log("listening on port 8080"));
+function getS3Object(arg0: { Bucket: string; Key: string }) {
+  throw new Error("Function not implemented.");
+}
