@@ -1,7 +1,7 @@
 import axios from "axios";
 const LAMBDA_FUNC_URL =
-  "https://pfe6dxe7ee77bzc6jktkbe5yje0rkmxb.lambda-url.eu-north-1.on.aws/";
-const textures_bucket = "virtual-showroom-textures";
+  "https://miahnujg4htrmim3beb67hyj6e0pqzdz.lambda-url.eu-north-1.on.aws/";
+const textures_bucket = "showroom-textures";
 
 export async function createWatermarkedTexture(
   username: string,

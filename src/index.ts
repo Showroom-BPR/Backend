@@ -79,7 +79,6 @@ app.get("/", (_, res) => {
  */
 app.get("/3DAsset", async (req, res) => {
   const processId: string = uuidv4();
-  console.log(processId);
 
   const username = req.query.username.toString();
   const productId = req.query.productId.toString();
