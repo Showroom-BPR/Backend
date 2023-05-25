@@ -1,13 +1,16 @@
 import { downloadS3Object, listObjects } from "./S3Service.js";
 import { readFileSync, mkdirSync } from "fs";
 import { join } from "path";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 type AnimationInfo = {
   name: string;
   dataStream: Buffer;
 };
 
-const bucket = "showroom-animations";
+const bucket = process.env.BUCKET_ANIMATIONS;
 
 export async function getAnimations(
   productId: string,
@@ -22,17 +25,12 @@ export async function getAnimations(
 
   for (let index = 1; index < animationItems["Contents"].length; index++) {
     const key = animationItems["Contents"][index].Key;
-    await downloadS3Object(
-      "showroom-animations",
-      key,
-      join(tempFolderPath, key)
-    );
+    await downloadS3Object(bucket, key, join(tempFolderPath, key));
     const animStream = await readFileSync(join(tempFolderPath, key));
     const item: AnimationInfo = {
       name: key,
       dataStream: animStream,
     };
-    console.log(item);
     animationsResult.push(item);
   }
 

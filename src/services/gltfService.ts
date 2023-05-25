@@ -1,6 +1,5 @@
 import { NodeIO, Document } from "@gltf-transform/core";
 import * as fs from "fs/promises";
-import { json } from "stream/consumers";
 
 export async function replaceTexture(
   textureFilePath: string,

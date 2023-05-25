@@ -1,7 +1,10 @@
 import axios from "axios";
-const LAMBDA_FUNC_URL =
-  "https://miahnujg4htrmim3beb67hyj6e0pqzdz.lambda-url.eu-north-1.on.aws/";
-const textures_bucket = "showroom-textures";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const LAMBDA_FUNC_URL = process.env.LAMBDA_URL;
+const textures_bucket = process.env.BUCKET_TEXTURES;
 
 export async function createWatermarkedTexture(
   username: string,
