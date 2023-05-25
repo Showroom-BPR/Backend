@@ -1,5 +1,6 @@
 import { NodeIO, Document } from "@gltf-transform/core";
 import * as fs from "fs/promises";
+import { json } from "stream/consumers";
 
 export async function replaceTexture(
   textureFilePath: string,
@@ -23,4 +24,17 @@ export async function replaceTexture(
   });
 
   return jsonModel;
+}
+
+export async function returnAnimation(productId: string): Promise<Uint8Array> {
+  const io = new NodeIO();
+
+  const gltfmodel = await io.read(productId);
+
+  const jsonString = gltfmodel.toString();
+
+  const encoder = new TextEncoder();
+  const encodedData = encoder.encode(jsonString);
+
+  return encodedData;
 }
