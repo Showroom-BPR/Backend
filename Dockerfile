@@ -5,4 +5,4 @@ RUN npm install
 COPY . .
 EXPOSE 80
 RUN npm run build --max-old-space-size=4096
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/src/index.js"]

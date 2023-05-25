@@ -1,7 +1,8 @@
 import express from "express";
-import { getS3Object } from "./services/S3Service.js";
+import { getAnimations } from "./services/AnimationService.js";
 import dotenv from "dotenv";
 import { get3DAsset } from "./services/3dAssetsService.js";
+import { getWatermark } from "./services/watermarkService.js";
 import { v4 as uuidv4 } from "uuid";
 import * as fs from "fs";
 import * as os from "os";
@@ -32,6 +33,23 @@ const options = {
 
 const specs = swaggerJSDocs(options);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     AnimationInfo:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: The name of the animation.
+ *           example: Drive.glb
+ *         dataStream:
+ *           type: Buffer
+ *           description: Buffer containing the animation's data
+ *           example: <Buffer 67 6c 54 46 02... >
+ */
 
 app.use(
   cors({
@@ -110,15 +128,62 @@ app.get("/3DAsset", async (req, res) => {
   }
 });
 
-//1st see which animations exist on s3 with the certain id.
-//for each id download from s3 with getS3Object, then put
-//it into an object array. Then return the list.
+app.get("/Watermark/:username", async (req, res) => {
+  const processId: string = uuidv4();
+
+  const username = req.params.username?.toString();
+
+  const processTempFolderName: string = `${os.tmpdir()}/LEGO_SHOWROOM/${processId}`;
+
+  try {
+    fs.mkdirSync(processTempFolderName, { recursive: true });
+
+    const watermark = await getWatermark(username, processTempFolderName);
+    res.send(watermark);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  } finally {
+    try {
+      if (processTempFolderName) {
+        fs.rmSync(processTempFolderName, { recursive: true });
+      }
+    } catch (e) {
+      console.error(
+        `An error has occurred while removing the temp folder at ${processTempFolderName}. Please remove it manually. Error: ${e}`
+      );
+    }
+  }
+});
+
+/**
+ * @openapi
+ * /Animations:
+ *   get:
+ *     description: Get all animations for a specific product.
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         description: Product identification
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Returns a list of the animations.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AnimationInfo'
+ *
+ *       500:
+ *         description: Something went wrong.
+ */
 app.get("/Animations/:productId", async (req, res) => {
   const processId: string = uuidv4();
-  console.log(processId);
 
-  // const prefix = req.query.prefix?.toString();  prefix si product id sunt acelasi lucru
-  // const delimiter = req.query.delimiter?.toString(); delimiter e mereu /
   const productId = req.params.productId?.toString();
 
   const processTempFolderName: string = `${os.tmpdir()}/LEGO_SHOWROOM/${processId}`;
