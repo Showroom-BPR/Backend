@@ -1,13 +1,13 @@
 {
-    "compilerOptions": {
-      "module": "NodeNext",
-      "moduleResolution": "Node16",
-      "target": "ES2020",
-      "sourceMap": true,
-      "outDir": "dist",
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true,
-      "lib": ["ES6", "DOM"]
-    },
-    "include": ["src/**/*"]
-  }
+  "compilerOptions": {
+    "module": "ES2020",
+    "moduleResolution": "node16",
+    "target": "ES2020",
+    "sourceMap": true,
+    "outDir": "dist",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["ES6", "DOM"]
+  },
+  "include": ["src/**/*", "integrationTests"]
+}

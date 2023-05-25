@@ -7,6 +7,7 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/index.js",
+    "test": "jest",
     "buildAndStart": "npm run build && npm run start"
   },
   "repository": {
@@ -37,12 +38,20 @@
     "multer": "^1.4.5-lts.1",
     "npm-gif": "^1.0.2",
     "sharp": "^0.32.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^4.6.3",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.21.8",
+    "@babel/preset-env": "^7.21.5",
+    "@babel/preset-typescript": "^7.21.5",
     "@types/express": "^4.17.17",
     "@types/jquery": "^3.5.16",
     "@types/node": "^18.15.11",
+    "babel-jest": "^29.5.0",
+    "eslint-plugin-import": "^2.27.5",
+    "jest": "^29.5.0",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5"
   }
