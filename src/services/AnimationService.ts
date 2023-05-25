@@ -1,24 +1,40 @@
-import { Prefix } from "aws-sdk/clients/firehose.js";
-import {
-  downloadS3Object,
-  existsPrefixInS3,
-  getS3Object,
-} from "./S3Service.js";
-import { returnAnimation } from "./gltfService.js";
+import { downloadS3Object, listObjects } from "./S3Service.js";
+import { readFileSync, mkdirSync } from "fs";
+import { join } from "path";
 
-export async function getAnimation(
+type AnimationInfo = {
+  name: string;
+  dataStream: Buffer;
+};
+
+const bucket = "showroom-animations";
+
+export async function getAnimations(
   productId: string,
-  key: string,
-  region: string
-): Promise<Uint8Array[]> {
-  await downloadS3Object("showroom-animations", "gif1.gif", "eu-north-1");
+  tempFolderPath: string
+): Promise<AnimationInfo[]> {
+  const animationItems = await listObjects(bucket, productId);
+  console.log(animationItems);
 
-  const animationArray: Uint8Array[] = [];
-  animationArray.push(await returnAnimation(productId));
-  //Method to download all the animations , then transform
-  //into json for example for sending the entire array for
-  //informations.
-  //array cu buffer.
+  let animationsResult: AnimationInfo[] = [];
 
-  return animationArray;
+  mkdirSync(join(tempFolderPath, productId), { recursive: true });
+
+  for (let index = 1; index < animationItems["Contents"].length; index++) {
+    const key = animationItems["Contents"][index].Key;
+    await downloadS3Object(
+      "showroom-animations",
+      key,
+      join(tempFolderPath, key)
+    );
+    const animStream = await readFileSync(join(tempFolderPath, key));
+    const item: AnimationInfo = {
+      name: key,
+      dataStream: animStream,
+    };
+    console.log(item);
+    animationsResult.push(item);
+  }
+
+  return animationsResult;
 }

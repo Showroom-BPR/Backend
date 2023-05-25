@@ -5,17 +5,38 @@ import {
   HeadObjectCommandInput,
   HeadObjectCommandOutput,
   GetObjectCommandOutput,
-  InventoryS3BucketDestinationFilterSensitiveLog,
-  S3,
+  ListObjectsCommand,
+  ListObjectsCommandInput,
+  ListObjectsCommandOutput,
 } from "@aws-sdk/client-s3";
 import { createWriteStream } from "fs";
 import { Readable } from "stream";
 import dotenv from "dotenv";
-import { Prefix } from "aws-sdk/clients/firehose.js";
 import AWS, { S3Control } from "aws-sdk";
-import { stringify } from "querystring";
 
 dotenv.config();
+
+export async function listObjects(
+  bucket: string,
+  prefix: string,
+  region: string = "eu-north-1"
+): Promise<ListObjectsCommandOutput> {
+  const client = new S3Client({
+    region: region,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+  });
+  const input: ListObjectsCommandInput = {
+    Bucket: bucket,
+    Prefix: prefix,
+  };
+
+  const command = new ListObjectsCommand(input);
+  const output = client.send(command);
+  return output;
+}
 
 export async function existsInS3(
   bucket: string,
@@ -83,6 +104,7 @@ export const downloadS3Object = async (
 ): Promise<void> => {
   const object = await getS3Object(bucket, key, region);
   if (object.Body instanceof Readable) {
+    console.log("writing to file");
     await writeStreamToFile(object.Body, outputPath);
   }
 };
