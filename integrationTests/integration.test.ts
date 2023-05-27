@@ -1,6 +1,6 @@
 import base64_encode from "./base64_encoding.js";
 import { createWatermarkedTexture } from "../src/services/LambdaService.js";
-import { SaveBufferToFile } from "../src/fsUtils.js";
+import { SaveBufferToFile } from "../src/utils.js";
 import { describe, expect, it } from "@jest/globals";
 import { writeFileSync, unlinkSync } from "fs";
 

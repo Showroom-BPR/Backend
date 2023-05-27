@@ -1,7 +1,7 @@
 import { existsInS3, downloadS3Object } from "./S3Service.js";
 import { createWatermarkedTexture } from "./LambdaService.js";
 import { replaceTexture } from "./gltfService.js";
-import { SaveBufferToFile } from "../fsUtils.js";
+import { SaveBufferToFile } from "../utils.js";
 import dotenv from "dotenv";
 
 dotenv.config();

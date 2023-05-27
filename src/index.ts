@@ -9,11 +9,25 @@ import * as os from "os";
 import cors from "cors";
 import * as swaggerUi from "swagger-ui-express";
 import swaggerJSDocs from "swagger-jsdoc";
+import { authenticate, authenticationError } from "aws-cognito-express";
+import {
+  GetAccessTokenFromRequest,
+  GetUsernameForAccessToken,
+} from "./utils.js";
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 80;
+
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: ["GET", "POST"],
+  })
+);
 
 const options = {
   definition: {
@@ -27,12 +41,35 @@ const options = {
         url: "http://localhost:80",
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   },
   apis: ["./src/index.ts"],
 };
 
 const specs = swaggerJSDocs(options);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+
+app.use(
+  authenticate({
+    region: process.env.AWS_REGION,
+    userPoolId: process.env.AWS_USER_POOL_ID,
+    tokenUse: ["access"],
+    audience: [process.env.AWS_COGNITO_APP_AUDIENCE],
+  })
+);
 
 /**
  * @openapi
@@ -51,14 +88,6 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
  *           example: <Buffer 67 6c 54 46 02... >
  */
 
-app.use(
-  cors({
-    origin: "*",
-    credentials: true,
-    optionsSuccessStatus: 200,
-    methods: ["GET", "POST"],
-  })
-);
 /**
  * @openapi
  * /:
@@ -68,7 +97,7 @@ app.use(
  *       200:
  *         description: Healthy and friendly server.
  */
-app.get("/", (_, res) => {
+app.get("/", async (req, res) => {
   res.send("Hello World!");
 });
 
@@ -76,14 +105,10 @@ app.get("/", (_, res) => {
  * @openapi
  * /3DAsset:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     description: Get a watermarked 3D asset.
  *     parameters:
- *       - in: query
- *         name: username
- *         required: true
- *         description: Username used in the watermarking process.
- *         schema:
- *           type: string
  *       - in: query
  *         name: productId
  *         required: true
@@ -96,10 +121,11 @@ app.get("/", (_, res) => {
  *       500:
  *         description: Something went wrong.
  */
-app.get("/3DAsset", async (req, res) => {
+app.get("/3DAsset", async (req: any, res) => {
   const processId: string = uuidv4();
 
-  const username = req.query.username.toString();
+  const token = GetAccessTokenFromRequest(req);
+  const username = await GetUsernameForAccessToken(token);
   const productId = req.query.productId.toString();
 
   const processTempFolderName: string = `${os.tmpdir()}/LEGO_SHOWROOM/${processId}`;
@@ -133,23 +159,17 @@ app.get("/3DAsset", async (req, res) => {
  * /Watermark:
  *   get:
  *     description: Get a transparent watermark png.
- *     parameters:
- *       - in: path
- *         name: username
- *         required: true
- *         description: Username used in the watermarking process.
- *         schema:
- *           type: string
  *     responses:
  *       200:
  *         description: Returns a Buffer of the png file.
  *       500:
  *         description: Something went wrong.
  */
-app.get("/Watermark/:username", async (req, res) => {
+app.get("/Watermark", async (req, res) => {
   const processId: string = uuidv4();
 
-  const username = req.params.username?.toString();
+  const token = GetAccessTokenFromRequest(req);
+  const username = await GetUsernameForAccessToken(token);
 
   const processTempFolderName: string = `${os.tmpdir()}/LEGO_SHOWROOM/${processId}`;
 
@@ -225,6 +245,8 @@ app.get("/Animations/:productId", async (req, res) => {
     }
   }
 });
+
+app.use(authenticationError());
 
 app.listen(port, () => {
   console.log(`App listening on port ${port}`);
