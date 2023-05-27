@@ -32,12 +32,18 @@ export async function get3DAsset(
       `${processTempFolderName}/${result_texture_name}`
     );
   } else {
-    const result = await createWatermarkedTexture(username, productId);
-    const buffer = Buffer.from(result, "binary");
-    await SaveBufferToFile(
-      buffer,
-      `/${processTempFolderName}/${result_texture_name}`
+    await createWatermarkedTexture(username, productId);
+    await downloadS3Object(
+      textures_bucket,
+      result_texture_name,
+      `${processTempFolderName}/${result_texture_name}`
     );
+
+    // const buffer = Buffer.from(result, "binary");
+    // await SaveBufferToFile(
+    //   buffer,
+    //   `/${processTempFolderName}/${result_texture_name}`
+    // );
   }
 
   return await replaceTexture(

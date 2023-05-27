@@ -128,6 +128,24 @@ app.get("/3DAsset", async (req, res) => {
   }
 });
 
+/**
+ * @openapi
+ * /Watermark:
+ *   get:
+ *     description: Get a transparent watermark png.
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         description: Username used in the watermarking process.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Returns a Buffer of the png file.
+ *       500:
+ *         description: Something went wrong.
+ */
 app.get("/Watermark/:username", async (req, res) => {
   const processId: string = uuidv4();
 

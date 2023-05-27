@@ -151,5 +151,7 @@ module.exports.watermark = async (event: any, context: any) => {
   //needed to clear permissions for the zip file
   exec("chmod -R o+rX .");
 
-  return await watermarkImage(JSON.parse(event.body));
+  await watermarkImage(JSON.parse(event.body));
+
+  return;
 };
