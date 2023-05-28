@@ -18,22 +18,9 @@ export async function replaceTexture(
 
   gltfmodel.getRoot().listTextures()[0].setURI(textureFilePath);
 
-  const jsonModel = await io.writeBinary(gltfmodel).then((json) => {
+  const binaryBuffer = await io.writeBinary(gltfmodel).then((json) => {
     return json;
   });
 
-  return jsonModel;
-}
-
-export async function returnAnimation(productId: string): Promise<Uint8Array> {
-  const io = new NodeIO();
-
-  const gltfmodel = await io.read(productId);
-
-  const jsonString = gltfmodel.toString();
-
-  const encoder = new TextEncoder();
-  const encodedData = encoder.encode(jsonString);
-
-  return encodedData;
+  return binaryBuffer;
 }

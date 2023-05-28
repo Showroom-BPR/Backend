@@ -1,7 +1,6 @@
 import { existsInS3, downloadS3Object } from "./S3Service.js";
 import { createWatermarkedTexture } from "./LambdaService.js";
 import { replaceTexture } from "./gltfService.js";
-import { SaveBufferToFile } from "../utils.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -38,12 +37,6 @@ export async function get3DAsset(
       result_texture_name,
       `${processTempFolderName}/${result_texture_name}`
     );
-
-    // const buffer = Buffer.from(result, "binary");
-    // await SaveBufferToFile(
-    //   buffer,
-    //   `/${processTempFolderName}/${result_texture_name}`
-    // );
   }
 
   return await replaceTexture(
