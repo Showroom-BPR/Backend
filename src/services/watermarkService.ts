@@ -25,7 +25,6 @@ export async function getWatermark(
   } else {
     await createWatermarkedTexture(username, "default");
 
-    // descarca aici bos
     await downloadS3Object(
       textures_bucket,
       result_texture_name,

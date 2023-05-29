@@ -17,7 +17,6 @@ export async function getAnimations(
   tempFolderPath: string
 ): Promise<AnimationInfo[]> {
   const animationItems = await listObjects(bucket, productId);
-  console.log(animationItems);
 
   let animationsResult: AnimationInfo[] = [];
 

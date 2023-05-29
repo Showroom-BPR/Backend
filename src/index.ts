@@ -3,6 +3,7 @@ import { getAnimations } from "./services/AnimationService.js";
 import dotenv from "dotenv";
 import { get3DAsset } from "./services/3dAssetsService.js";
 import { getWatermark } from "./services/watermarkService.js";
+import { getBackgrounds } from "./services/backgroundsService.js";
 import { v4 as uuidv4 } from "uuid";
 import * as fs from "fs";
 import * as os from "os";
@@ -86,6 +87,17 @@ app.use(
  *           type: Buffer
  *           description: Buffer containing the animation's data
  *           example: <Buffer 67 6c 54 46 02... >
+ *     BackgroundInfo:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: The name of the background file.
+ *           example: lego_logo.jpg
+ *         dataStream:
+ *           type: Buffer
+ *           description: Buffer containing the file's data
+ *           example: <Buffer 67 6c 54 46 02... >
  */
 
 /**
@@ -118,6 +130,8 @@ app.get("/", async (req, res) => {
  *     responses:
  *       200:
  *         description: Returns a Buffer of the 3D asset.
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Something went wrong.
  */
@@ -162,6 +176,8 @@ app.get("/3DAsset", async (req: any, res) => {
  *     responses:
  *       200:
  *         description: Returns a Buffer of the png file.
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Something went wrong.
  */
@@ -216,6 +232,8 @@ app.get("/Watermark", async (req, res) => {
  *               items:
  *                 $ref: '#/components/schemas/AnimationInfo'
  *
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Something went wrong.
  */
@@ -230,6 +248,50 @@ app.get("/Animations/:productId", async (req, res) => {
     fs.mkdirSync(processTempFolderName, { recursive: true });
     const animations = await getAnimations(productId, processTempFolderName);
     res.send(animations);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  } finally {
+    try {
+      if (processTempFolderName) {
+        fs.rmSync(processTempFolderName, { recursive: true });
+      }
+    } catch (e) {
+      console.error(
+        `An error has occurred while removing the temp folder at ${processTempFolderName}. Please remove it manually. Error: ${e}`
+      );
+    }
+  }
+});
+
+/**
+ * @openapi
+ * /Backgrounds:
+ *   get:
+ *     description: Get all available backgrounds.
+ *     responses:
+ *       200:
+ *         description: Returns a list of the backgrounds.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/BackgroundInfo'
+ *
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Something went wrong.
+ */
+app.get("/Backgrounds", async (req, res) => {
+  const processId: string = uuidv4();
+  const processTempFolderName: string = `${os.tmpdir()}/LEGO_SHOWROOM/${processId}`;
+
+  try {
+    fs.mkdirSync(processTempFolderName, { recursive: true });
+    const backgrounds = await getBackgrounds(processTempFolderName);
+    res.send(backgrounds);
   } catch (error) {
     console.log(error);
     res.sendStatus(500);
