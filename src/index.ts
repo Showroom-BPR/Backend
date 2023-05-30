@@ -95,9 +95,8 @@ app.use(
  *           description: The name of the background file.
  *           example: lego_logo.jpg
  *         dataStream:
- *           type: Buffer
- *           description: Buffer containing the file's data
- *           example: <Buffer 67 6c 54 46 02... >
+ *           type: string
+ *           description: Base64 string containing the file's data
  */
 
 /**
@@ -175,7 +174,7 @@ app.get("/3DAsset", async (req: any, res) => {
  *     description: Get a transparent watermark png.
  *     responses:
  *       200:
- *         description: Returns a Buffer of the png file.
+ *         description: Returns a Base64 string of the png file.
  *       401:
  *         description: Unauthorized
  *       500:
@@ -192,8 +191,9 @@ app.get("/Watermark", async (req, res) => {
   try {
     fs.mkdirSync(processTempFolderName, { recursive: true });
 
-    const watermark = await getWatermark(username, processTempFolderName);
-    res.send(watermark);
+    const watermarkBuffer = await getWatermark(username, processTempFolderName);
+    const watermarkBase64 = Buffer.from(watermarkBuffer).toString("base64");
+    res.send(watermarkBase64);
   } catch (error) {
     console.log(error);
     res.sendStatus(500);

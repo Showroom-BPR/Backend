@@ -7,7 +7,7 @@ dotenv.config();
 
 type BackgroundInfo = {
   name: string;
-  dataStream: Buffer;
+  dataStream: string;
 };
 
 const bucket = process.env.BUCKET_BACKGROUNDS;
@@ -22,10 +22,10 @@ export async function getBackgrounds(
   for (let index = 0; index < backgroundItems["Contents"].length; index++) {
     const key = backgroundItems["Contents"][index].Key;
     await downloadS3Object(bucket, key, join(tempFolderPath, key));
-    const animStream = await readFileSync(join(tempFolderPath, key));
+    const animStream = readFileSync(join(tempFolderPath, key));
     const item: BackgroundInfo = {
       name: key,
-      dataStream: animStream,
+      dataStream: Buffer.from(animStream).toString("base64"),
     };
     backgroundsResult.push(item);
   }
