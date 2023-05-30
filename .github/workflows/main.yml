@@ -1,4 +1,4 @@
-name: Deploy master
+name: Deploy main to Elastic Beanstalk Environment
 
 on:
   push:

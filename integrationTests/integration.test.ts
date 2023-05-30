@@ -1,8 +1,14 @@
 import base64_encode from "./base64_encoding.js";
 import { createWatermarkedTexture } from "../src/services/LambdaService.js";
+import { downloadS3Object } from "../src/services/S3Service.js";
 import { SaveBufferToFile } from "../src/utils.js";
 import { describe, expect, it } from "@jest/globals";
 import { writeFileSync, unlinkSync } from "fs";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const textures_bucket = process.env.BUCKET_TEXTURES;
 
 describe("watermarked image", () => {
   it("matches the expected image", async () => {
@@ -11,12 +17,17 @@ describe("watermarked image", () => {
     const username: string = "Jane Doe";
     const productId: string = "lego_mario";
     const textureFileType = ".png";
-    const result_texture_name = `${username}-${productId}${textureFileType}`;
-
-    const result = await createWatermarkedTexture(username, productId);
-    const buffer = Buffer.from(result, "binary");
+    const clean_username = username.replace(" ", "_");
+    const result_texture_name = `${clean_username}-${productId}${textureFileType}`;
     const resultFilePath = `integrationTests/${result_texture_name}`;
-    writeFileSync(resultFilePath, buffer);
+
+    await createWatermarkedTexture(username, productId);
+
+    await downloadS3Object(
+      textures_bucket,
+      result_texture_name,
+      resultFilePath
+    );
 
     var resultedBase64 = base64_encode(resultFilePath);
     unlinkSync(resultFilePath);
@@ -30,12 +41,16 @@ describe("watermarked image", () => {
     const username: string = "Jane Doe";
     const productId: string = "lego_mario";
     const textureFileType = ".png";
-    const result_texture_name = `${username}-${productId}${textureFileType}`;
-
-    const result = await createWatermarkedTexture(username, productId);
-    const buffer = Buffer.from(result, "binary");
+    const clean_username = username.replace(" ", "_");
+    const result_texture_name = `${clean_username}-${productId}${textureFileType}`;
     const resultFilePath = `integrationTests/${result_texture_name}`;
-    writeFileSync(resultFilePath, buffer);
+
+    await createWatermarkedTexture(username, productId);
+    await downloadS3Object(
+      textures_bucket,
+      result_texture_name,
+      resultFilePath
+    );
 
     var resultedBase64 = base64_encode(resultFilePath);
     unlinkSync(resultFilePath);
