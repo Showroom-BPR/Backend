@@ -15,6 +15,8 @@ import {
   GetAccessTokenFromRequest,
   GetUsernameForAccessToken,
 } from "./utils.js";
+import { ListObjectsCommandOutput } from "@aws-sdk/client-s3";
+import { listObjects } from "./services/S3Service.js";
 
 dotenv.config();
 
@@ -110,6 +112,34 @@ app.use(
  */
 app.get("/", async (req, res) => {
   res.send("Hello World!");
+});
+
+/**
+ * @openapi
+ * /ProductIds:
+ *   get:
+ *     security:
+ *       - bearerAuth: []
+ *     description: Get an array of productIds available.
+ *     responses:
+ *       200:
+ *         description: Returns an array of productIds available.
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Something went wrong.
+ */
+app.get("/ProductIds", async (req, res) => {
+  const assetsBucket = process.env.BUCKET_MODELS;
+  const productsList: ListObjectsCommandOutput = await listObjects(
+    assetsBucket,
+    ""
+  );
+  let productIds: string[] = [];
+  productsList.Contents.forEach((obj) => {
+    productIds.push(obj.Key.split(".")[0]);
+  });
+  res.send(productIds);
 });
 
 /**

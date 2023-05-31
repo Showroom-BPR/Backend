@@ -17,18 +17,6 @@ export function GetAccessTokenFromRequest(request: any): string {
 }
 
 export async function GetUsernameForAccessToken(token: string) {
-  let requestOptions = {
-    method: "POST",
-    headers: {
-      "X-Amz-Target": "AWSCognitoIdentityProviderService.GetUser",
-      "Content-Type": "application/x-amz-json-1.1",
-    },
-    body: JSON.stringify({
-      AccessToken: token,
-    }),
-    redirect: "follow",
-  };
-
   return await fetch("https://cognito-idp.eu-north-1.amazonaws.com/", {
     method: "POST",
     headers: {
